@@ -826,7 +826,7 @@ public class Maelstrom : ICave
 {
     public Maelstrom()
     {
-        Description = "You have encountered a Maelstrom and been blown to another cave!";
+        Description = "You have encountered the Maelstrom and been blown to another cave!";
     }
 
     public string Description { get; private set; }
@@ -845,7 +845,7 @@ public class AnEmptyCave : ICave
     public string Description { get; private set; }
     public AnEmptyCave()
     {
-        Description = "A eerily dark, dank, rough and deserted cave. Move along now - nothing to see here!";
+        Description = "A eerily dark, dank, rough,  deserted cave. Move along now - nothing to see here!";
     }
 
     public override string ToString()
