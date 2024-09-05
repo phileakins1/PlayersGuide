@@ -1,6 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using static MapPositionStructs;
+using static BoardObjectStructs;
 using static SpecialCavesMapPositionSetup;
 using static System.Console;
 
@@ -11,21 +11,21 @@ using static System.Console;
 // Expansion 3 - Maelstrom challenge (accommodating different size boards
 
 
-// TODO Recount pits on the large board to total 4 & 2 on the medium board.
-// TODO Recount maelstroms on the large board to total 2 & 1 on the medium board.
+// TODO Recount pits on the large board to total 4 large & 2 on the medium board.
+// TODO Recount maelstroms on the large board to total 2 large & 1 on the medium board.
 
 
-(int X, int Y) = SelectCavernSize.GetCavernSize();
-ICave[,] _caves = new ICave[X, Y];
+(int _row, int _columns) = SelectCavernSize.GetCavernSize();
+ICave[,] _caves = new ICave[_row, _columns];
 
 
-MapPositionStructs _playArea = new(_caves);
+BoardObjectStructs _playArea = new(_caves);
 _playArea.SetupScreen();
 _caves = _playArea.FillEmptyCaves();
 
 PlayTheGame _play = new(_caves);
 
-_play.PlayerMovements();
+_play.GetPlayerMovement();
 
 
 class SelectCavernSize
@@ -36,14 +36,14 @@ class SelectCavernSize
     public static (int, int) GetCavernSize()
     {
         (int, int) _size = (0, 0);
-        string _choice;
+        string? _choice;
         bool _validResponse = false;
 
         do
         {
             WriteMenu();
             Write("\n Enter size of board: > ");
-            _choice = ReadLine()!.ToLower().Trim();
+            _choice = ReadLine()?.ToLower().Trim();
 
             if (_choice == "m")
             {
@@ -129,21 +129,21 @@ static class SpecialCavesMapPositionSetup
 
     public static (int, int) MaelstromCavePosition2(int rowMax, int columnMax)
     {
-        return (5, 3);
+        return (4, 3);
     }
 
     public static (int, int) MaelstromCavePosition3(int rowMax, int columnMax)
     {
-        return (4, 6);
+        return (5, 6);
     }
 
     public static (int, int) MaelstromCavePosition4(int rowMax, int columnMax)
     {
-        return (7, 2);
+        return (6, 2);
     }
 }
 
-public class MapPositionStructs(ICave[,] caves)
+public class BoardObjectStructs(ICave[,] caves)
 {
     public ICave[,] Caves { get; private set; } = caves;
 
@@ -196,18 +196,17 @@ public class MapPositionStructs(ICave[,] caves)
             Column = column;
         }
 
-        public bool IsAdjacentToPit(PlayerCurrentPosition player)
+        public void IsAdjacentTo(PlayerCurrentPosition player)
         {
-            if (!(this.Row - player.Row is < -1 or > 1 || this.Column - player.Column is < -1 or > 1) && (!IsTheSameAsPit(player)))
+            if (!(this.Row - player.Row is < -1 or > 1 || this.Column - player.Column is < -1 or > 1) && (!IsTheSameAs(player)))
             {
                 ForegroundColor = ConsoleColor.Red;
                 WriteLine("You feel a draught, There is a pit nearby!");
                 ResetColor();
             }
-            return false;
         }
 
-        public bool IsTheSameAsPit(PlayerCurrentPosition player)
+        public bool IsTheSameAs(PlayerCurrentPosition player)
         {
             if (this.Row == player.Row && this.Column == player.Column) return true;
             else return false;
@@ -225,9 +224,9 @@ public class MapPositionStructs(ICave[,] caves)
             Column = column;
         }
 
-        public void IsAdjacentToMaelstrom(PlayerCurrentPosition player)
+        public void IsAdjacentTo(PlayerCurrentPosition player)
         {
-            if (!(this.Row - player.Row is < -1 or > 1 || this.Column - player.Column is < -1 or > 1) && (!IsTheSameAsMaelstrom(player)))
+            if (!(this.Row - player.Row is < -1 or > 1 || this.Column - player.Column is < -1 or > 1) && (!IsTheSameAs(player)))
             {
                 ForegroundColor = ConsoleColor.Green;
                 WriteLine("You hear the growling and groaning of a Maelstrom nearby!");
@@ -235,7 +234,7 @@ public class MapPositionStructs(ICave[,] caves)
             }
         }
 
-        public bool IsTheSameAsMaelstrom(PlayerCurrentPosition player)
+        public bool IsTheSameAs(PlayerCurrentPosition player)
         {
             if (this.Row == player.Row && this.Column == player.Column) return true;
             else return false;
@@ -264,7 +263,6 @@ public class MapPositionStructs(ICave[,] caves)
                 Caves[i, j] = new AnEmptyCave();
             }
         }
-
         return Caves;
     }
 }
@@ -277,15 +275,18 @@ public class PlayTheGame
     FountainPositionStruct _fountainPosition = new();
 
     PitPositionStruct _pitPosition1;
-    /*PitPositionStruct _pitPosition2;
+    PitPositionStruct _pitPosition2;
     PitPositionStruct _pitPosition3;
-    PitPositionStruct _pitPosition4;*/
+    PitPositionStruct _pitPosition4;
 
     MaelstromPositionStruct _maestromPosition1;
-    /*MaelstromPositionStruct _maestromPosition2;
+    MaelstromPositionStruct _maestromPosition2;
     MaelstromPositionStruct _maestromPosition3;
-    MaelstromPositionStruct _maestromPosition4;*/
+    MaelstromPositionStruct _maestromPosition4;
 
+    /// <summary>
+    /// The playing board.
+    /// </summary>
     public ICave[,] PlayArea { get; private set; }
 
     /// <summary>
@@ -293,12 +294,11 @@ public class PlayTheGame
     /// </summary>
     /// <param name="playArea">The board with background setup to be populated with the interesting bits</param>
 
-
     public PlayTheGame(ICave[,] playArea)
     {
         PlayArea = playArea;
 
-        PositionAssets();
+        PositionBaseObjects();
         FillTheBoardWithPerils();
 
         // Player always starts at the entrance - wherever that might end up
@@ -306,7 +306,7 @@ public class PlayTheGame
         _playerCurrentPosition.Column = _entrancePosition.Column;
     }
 
-    internal void PositionAssets()
+    internal void PositionBaseObjects()
     {
         int _rowMax = PlayArea.GetUpperBound(0);
         int _colMax = PlayArea.GetUpperBound(1);
@@ -323,17 +323,19 @@ public class PlayTheGame
         _entrancePosition.Row = _row;
         _entrancePosition.Column = _column;
         PlayArea[_row, _column] = new CavernEntrance();
+
+
     }
 
     internal void FillTheBoardWithPerils()
     {
         // Using the factory output, fill the object position Structs and complete the board according to the Expansions.
 
-        PositionPits();
-        PositionMaelstroms();
+        PositionPitsOnBoard();
+        PositionMaelstromsOnBoard();
     }
 
-    private void PositionPits()
+    private void PositionPitsOnBoard()
     {
         int _rowMax = PlayArea.GetUpperBound(0);
         int _colMax = PlayArea.GetUpperBound(1);
@@ -349,9 +351,41 @@ public class PlayTheGame
         _pitPosition1.Row = _row;
         _pitPosition1.Column = _column;
         PlayArea[_row, _column] = new ABottomlessPit();
+
+        // Extra pit on Medium board 
+        if (_rowMax > 3 && _rowMax <= 5)
+        {
+            _pitPosition2 = new();
+            (_row, _column) = PitCavePosition2(_rowMax, _colMax);
+            _pitPosition2.Row = _row;
+            _pitPosition2.Column = _column;
+            PlayArea[_row, _column] = new ABottomlessPit();
+        }
+
+        // 3 extra pits on Large board
+        if (_rowMax > 5)
+        {
+            _pitPosition2 = new();
+            (_row, _column) = PitCavePosition2(_rowMax, _colMax);
+            _pitPosition2.Row = _row;
+            _pitPosition2.Column = _column;
+            PlayArea[_row, _column] = new ABottomlessPit();
+
+            _pitPosition3 = new();
+            (_row, _column) = PitCavePosition3(_rowMax, _colMax);
+            _pitPosition3.Row = _row;
+            _pitPosition3.Column = _column;
+            PlayArea[_row, _column] = new ABottomlessPit();
+
+            _pitPosition4 = new();
+            (_row, _column) = PitCavePosition4(_rowMax, _colMax);
+            _pitPosition4.Row = _row;
+            _pitPosition4.Column = _column;
+            PlayArea[_row, _column] = new ABottomlessPit();
+        }
     }
 
-    private void PositionMaelstroms()
+    private void PositionMaelstromsOnBoard()
     {
         int _rowMax = PlayArea.GetUpperBound(0);
         int _colMax = PlayArea.GetUpperBound(1);
@@ -364,9 +398,45 @@ public class PlayTheGame
         (_row, _column) = MaelstromCavePosition1(_rowMax, _colMax);
         _maestromPosition1.Row = _row;
         _maestromPosition1.Column = _column;
-        PlayArea[_row, _column] = new AMaelstrom();
+        PlayArea[_row, _column] = new Maelstrom();
+
+        // Medium board
+        if (_rowMax > 3 && _rowMax <= 5)
+        {
+            _maestromPosition2 = new();
+            (_row, _column) = MaelstromCavePosition2(_rowMax, _colMax);
+            _maestromPosition2.Row = _row;
+            _maestromPosition2.Column = _column;
+            PlayArea[_row, _column] = new Maelstrom();
+        }
+
+        // Large board
+        if (_rowMax > 5)
+        {
+            _maestromPosition2 = new();
+            (_row, _column) = MaelstromCavePosition2(_rowMax, _colMax);
+            _maestromPosition2.Row = _row;
+            _maestromPosition2.Column = _column;
+            PlayArea[_row, _column] = new Maelstrom();
+
+            _maestromPosition3 = new();
+            (_row, _column) = MaelstromCavePosition3(_rowMax, _colMax);
+            _maestromPosition3.Row = _row;
+            _maestromPosition3.Column = _column;
+            PlayArea[_row, _column] = new Maelstrom();
+
+            _maestromPosition4 = new();
+            (_row, _column) = MaelstromCavePosition4(_rowMax, _colMax);
+            _maestromPosition4.Row = _row;
+            _maestromPosition4.Column = _column;
+            PlayArea[_row, _column] = new Maelstrom();
+        }
     }
-    public void PlayerMovements()
+
+    /// <summary>
+    /// Main game loop.
+    /// </summary>
+    public void GetPlayerMovement()
     {
         bool _validResponse = false;
 
@@ -375,14 +445,14 @@ public class PlayTheGame
             WriteLine(new string('-', 90));
             ForegroundColor = ConsoleColor.Gray;
 
-
+            // Action current perils after player movement.
             if (CheckForPits())
             {
-                // Player is in an endless fall! No use waiting about.
+                // Player is in an endless fall! No use hanging about.
                 break;
             }
 
-            DiscoverMaelstroms();
+            CheckForMaelstroms();
 
             WriteLine($"You are in the cave at ({_playerCurrentPosition.Row}, {_playerCurrentPosition.Column})");
 
@@ -396,7 +466,7 @@ public class PlayTheGame
                 "move west" or "west" or "w" => MoveWest(),
                 "move north" or "north" or "n" => MoveNorth(),
                 "move south" or "south" or "s" => MoveSouth(),
-                "enable fountain" or "enable" or "activate" => EnabledFountain(),
+                "enable fountain" or "enable" or "activate" => EnableFountain(),
                 "quit" or "exit" or "q" => false,
                 _ => true
             };
@@ -416,7 +486,7 @@ public class PlayTheGame
     }
 
     /// <summary>
-    /// Move - but stay on the board by wrapping round: predicated on board's actual boundaries - not on 'magic' numbers.
+    /// Move - but stay on the board by wrapping round: predicated on each board's boundaries - not on 'magic' numbers.
     /// </summary>
     /// <returns> Returns new position </returns>
 
@@ -454,12 +524,12 @@ public class PlayTheGame
         return true;
     }
 
-    private bool EnabledFountain()
+    private bool EnableFountain()
     {
         // The fountain is present?
         if (_fountainPosition.IsTheSameAs(_playerCurrentPosition))
         {
-            // Change message
+            // Change messages
             ActivatedFountainCave _activeFountain = new();
             PlayArea[_playerCurrentPosition.Row, _playerCurrentPosition.Column] = _activeFountain;
 
@@ -467,36 +537,102 @@ public class PlayTheGame
             ActivatedCavernEntrance _activeEntrance = new();
             PlayArea[_entrancePosition.Row, _entrancePosition.Column] = _activeEntrance;
         }
-        else WriteLine("Can't be done, you  have actually to be close to the fountain to do that!");
+        else WriteLine("Can't be done - you  have to be present in the fountain cave to do that!");
 
         return true;
     }
 
     private bool CheckForPits()
     {
+        // Assumes a rectangular board.
+        int _rowMax = PlayArea.GetUpperBound(0);
+
         // One default pit on all boards
 
-        if (_pitPosition1.IsTheSameAsPit(_playerCurrentPosition))
+        if (_pitPosition1.IsTheSameAs(_playerCurrentPosition))
         {
+            // You fell in!
             PlayArea[_playerCurrentPosition.Row, _playerCurrentPosition.Column].ToString();
             return true;
         }
 
-        return _pitPosition1.IsAdjacentToPit(_playerCurrentPosition);
+        // A Pit is near but don't print message if the player is about to be blown away to a new cave.
+        if (!_maestromPosition1.IsTheSameAs(_playerCurrentPosition))
+        {
+            _pitPosition1.IsAdjacentTo(_playerCurrentPosition);
+        }
 
+        // An extra pit on the Medium board
+        if (_rowMax > 3 && _rowMax <= 5)
+        {
+            // Pit 2
+            if (_pitPosition2.IsTheSameAs(_playerCurrentPosition))
+            {
+                PlayArea[_playerCurrentPosition.Row, _playerCurrentPosition.Column].ToString();
+                return true;
+            }
+            if (!_maestromPosition2.IsTheSameAs(_playerCurrentPosition))
+            {
+                _pitPosition2.IsAdjacentTo(_playerCurrentPosition);
+            }
+        }
+
+        // Three extra pits on Large board.
+        if (_rowMax > 5)
+        {
+            // Pit 2
+            if (_pitPosition2.IsTheSameAs(_playerCurrentPosition))
+            {
+                PlayArea[_playerCurrentPosition.Row, _playerCurrentPosition.Column].ToString();
+                return true;
+            }
+            if (!_maestromPosition2.IsTheSameAs(_playerCurrentPosition))
+            {
+                _pitPosition2.IsAdjacentTo(_playerCurrentPosition);
+            }
+
+            // Pit 3
+            if (_pitPosition3.IsTheSameAs(_playerCurrentPosition))
+            {
+                PlayArea[_playerCurrentPosition.Row, _playerCurrentPosition.Column].ToString();
+                return true;
+            }
+            if (!_maestromPosition3.IsTheSameAs(_playerCurrentPosition))
+            {
+                _pitPosition3.IsAdjacentTo(_playerCurrentPosition);
+            }
+
+            // Pit 4
+            if (_pitPosition4.IsTheSameAs(_playerCurrentPosition))
+            {
+                PlayArea[_playerCurrentPosition.Row, _playerCurrentPosition.Column].ToString();
+                return true;
+            }
+            if (!_maestromPosition4.IsTheSameAs(_playerCurrentPosition))
+            {
+                _pitPosition4.IsAdjacentTo(_playerCurrentPosition);
+            }
+        }
+        return false;
     }
 
 
-    private void DiscoverMaelstroms()
+
+
+    private void CheckForMaelstroms()
     {
+        // Assumes rectangular board.
+        int _rowMax = PlayArea.GetUpperBound(0);
+
         // Small board maelstrom1 is present on each board.
 
-        _maestromPosition1.IsAdjacentToMaelstrom(_playerCurrentPosition);
+        _maestromPosition1.IsAdjacentTo(_playerCurrentPosition);
 
 
-        if (_maestromPosition1.IsTheSameAsMaelstrom(_playerCurrentPosition))
+        if (_maestromPosition1.IsTheSameAs(_playerCurrentPosition))
         {
-            MovePlayer();
+            PlayArea[_playerCurrentPosition.Row, _playerCurrentPosition.Column].ToString();
+            BlowPlayerToANewCave();
 
             (int row, int column) = MoveMaelstrom(_maestromPosition1.Row, _maestromPosition1.Column);
 
@@ -504,6 +640,66 @@ public class PlayTheGame
             _maestromPosition1.Column = column;
         }
 
+        // Medium 6X6 board with one extra Maelstrom
+        if (_rowMax > 3 && _rowMax <= 5)
+        {
+            _maestromPosition2.IsAdjacentTo(_playerCurrentPosition);
+
+
+            if (_maestromPosition2.IsTheSameAs(_playerCurrentPosition))
+            {
+                PlayArea[_playerCurrentPosition.Row, _playerCurrentPosition.Column].ToString();
+                BlowPlayerToANewCave();
+
+                (int row, int column) = MoveMaelstrom(_maestromPosition2.Row, _maestromPosition2.Column);
+
+                _maestromPosition2.Row = row;
+                _maestromPosition2.Column = column;
+            }
+        }
+
+        // Large board with 3 extra Maelstroms
+        if (_rowMax > 5)
+        {
+            _maestromPosition2.IsAdjacentTo(_playerCurrentPosition);
+
+            if (_maestromPosition2.IsTheSameAs(_playerCurrentPosition))
+            {
+                PlayArea[_playerCurrentPosition.Row, _playerCurrentPosition.Column].ToString();
+                BlowPlayerToANewCave();
+
+                (int row, int column) = MoveMaelstrom(_maestromPosition2.Row, _maestromPosition2.Column);
+
+                _maestromPosition2.Row = row;
+                _maestromPosition2.Column = column;
+            }
+
+            _maestromPosition3.IsAdjacentTo(_playerCurrentPosition);
+
+            if (_maestromPosition3.IsTheSameAs(_playerCurrentPosition))
+            {
+                PlayArea[_playerCurrentPosition.Row, _playerCurrentPosition.Column].ToString();
+                BlowPlayerToANewCave();
+
+                (int row, int column) = MoveMaelstrom(_maestromPosition3.Row, _maestromPosition3.Column);
+
+                _maestromPosition3.Row = row;
+                _maestromPosition3.Column = column;
+            }
+
+            _maestromPosition4.IsAdjacentTo(_playerCurrentPosition);
+
+            if (_maestromPosition4.IsTheSameAs(_playerCurrentPosition))
+            {
+                PlayArea[_playerCurrentPosition.Row, _playerCurrentPosition.Column].ToString();
+                BlowPlayerToANewCave();
+
+                (int row, int column) = MoveMaelstrom(_maestromPosition4.Row, _maestromPosition4.Column);
+
+                _maestromPosition4.Row = row;
+                _maestromPosition4.Column = column;
+            }
+        }
     }
 
     private (int, int) MoveMaelstrom(int row, int column)
@@ -520,22 +716,16 @@ public class PlayTheGame
         if (column - 1 < PlayArea.GetLowerBound(0)) column = PlayArea.GetUpperBound(0);
         else column--;
 
-        PlayArea[row, column] = new AMaelstrom();
+        PlayArea[row, column] = new Maelstrom();
 
         return (row, column);
     }
 
-    private void MovePlayer()
+    private void BlowPlayerToANewCave()
     {
-        // Blow player to new position
         MoveNorth();
         MoveEast();
         MoveEast();
-
-        ForegroundColor = ConsoleColor.Green;
-        WriteLine($"You have encountered the Maelstrom and been blown to the cave at ({_playerCurrentPosition.Row}, {_playerCurrentPosition.Column})");
-        ResetColor();
-        WriteLine(new string('-', 90));
     }
 }
 
@@ -551,21 +741,14 @@ public interface ICave
 public class CavernEntrance : ICave
 {
     public string Description { get; private set; }
-    public string Leaving { get; private set; }
-    public bool FountainIsActivated { get; set; } = false;
-
     public CavernEntrance()
     {
         Description = "You see a light coming from outside the cavern. This is the entrance.";
-        Leaving = "The Fountain of Objects has been re-activated. You have escaped with your life!";
     }
     public override string ToString()
     {
         ForegroundColor = ConsoleColor.Yellow;
-
-        if (FountainIsActivated) WriteLine(Leaving);
-        else WriteLine(Description);
-
+        WriteLine(Description);
         ResetColor();
         return string.Empty;
     }
@@ -582,9 +765,7 @@ public class ActivatedCavernEntrance : ICave
     public override string ToString()
     {
         ForegroundColor = ConsoleColor.Yellow;
-
         WriteLine(Description);
-
         ResetColor();
         return string.Empty;
     }
@@ -602,7 +783,6 @@ public class FountainCave : ICave
     {
         ForegroundColor = ConsoleColor.Blue;
         WriteLine(Description);
-
         ResetColor();
         return string.Empty;
     }
@@ -619,9 +799,7 @@ public class ActivatedFountainCave : ICave
     public override string ToString()
     {
         ForegroundColor = ConsoleColor.Blue;
-
         WriteLine(Description);
-
         ResetColor();
         return string.Empty;
     }
@@ -632,27 +810,23 @@ public class ABottomlessPit : ICave
     public string Description { get; private set; }
     public ABottomlessPit()
     {
-        //WriteLine(new string('-', 90));
-
-        Description = "You have fallen into a bottomless pit. Good luck with that! See you in the next life. Bye.";
+        Description = "\nYou have fallen into a bottomless pit. Good luck with that!  See you in the next life. Bye ....\n";
     }
 
     public override string ToString()
     {
         ForegroundColor = ConsoleColor.Red;
-
         WriteLine(Description);
-
         ResetColor();
         return string.Empty;
     }
 }
 
-public class AMaelstrom : ICave
+public class Maelstrom : ICave
 {
-    public AMaelstrom()
+    public Maelstrom()
     {
-        Description = "You have been blown into another cave!";
+        Description = "You have encountered a Maelstrom and been blown to another cave!";
     }
 
     public string Description { get; private set; }
@@ -662,7 +836,6 @@ public class AMaelstrom : ICave
         ForegroundColor = ConsoleColor.Green;
         WriteLine(Description);
         ResetColor();
-
         return string.Empty;
     }
 }
@@ -672,7 +845,7 @@ public class AnEmptyCave : ICave
     public string Description { get; private set; }
     public AnEmptyCave()
     {
-        Description = "A eerily dark, musty, rough and deserted cave. Move along - nothing of interest here!";
+        Description = "A eerily dark, dank, rough and deserted cave. Move along now - nothing to see here!";
     }
 
     public override string ToString()
