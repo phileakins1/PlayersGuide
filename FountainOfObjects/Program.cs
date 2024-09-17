@@ -3,12 +3,13 @@
 
 // Ignore Spelling: Amarok Amarock
 
-// Experimental static using.
-using static BoardObjectStructs;
+// Experimental static usings.
+using static BoardObjectPositions;
 using static SpecialCavesMapPositionSetup;
 using static System.Console;
 
 
+// Using The Book with the C# 11 Expansion
 // C# Players Guide Fountain of Objects Challenge. - 1000 XP at stake
 
 // Basic challenge completed; plus:
@@ -17,36 +18,36 @@ using static System.Console;
 // Expansion 3 - Maelstrom challenge (accommodating different size boards) - completed
 // Expansion 4 - Amarok challenge (accommodating different size boards) - completed
 // Expansion 5 - Bows and arrows - completed for 4 cardinal points
-// Expansion 6 - Instructions and help - Part completed ...
-
-// TODO Refactor the program into separate class based files/ name spaces?/ directory structure
+// Expansion 6 - Instructions and help - Completed ...
 
 
+// TODO Refactor the program into separate class based files / name spaces / directory structure
+
+// Create the game board
 (int _row, int _columns) = SelectCavernSize.GetCavernSize();
-
 ICave[,] _caves = new ICave[_row, _columns];
+BoardObjectPositions _playArea = new(_caves);
 
-BoardObjectStructs _playArea = new(_caves);
-
-// Screen title
-_playArea.StartupScreen();
+// Window title and Instructions
+_playArea.StartupScreens();
 
 // Add background caves
 _caves = _playArea.FillEmptyCaves();
 
+// Create the game structure
 PlayTheGame _play = new(_caves);
 
 // Start the game loop
 _play.GetPlayerChoice();
 
-class SelectCavernSize
+public class SelectCavernSize
 {
     protected SelectCavernSize() { }
 
     // TODO setup future X and Y choices for a custom size cavern 
 
     /// <summary>
-    /// Establishes the playing board size. 
+    /// Establishes the playing board size.
     /// </summary>
     /// <returns>A tuple with the row and column numerations for its creation.</returns>
 
@@ -83,9 +84,9 @@ class SelectCavernSize
 
         return _size;
     }
+
     private static void WriteBoardSizeMenu()
     {
-        // Players Guide C# 11 Expansion
         string _menu = """
             Choose the size of the cavern
 
@@ -99,9 +100,9 @@ class SelectCavernSize
 }
 
 /// <summary>
-///  Centralize 'special' class array co-ordinates
+///  Centralize  game object class array co-ordinates
 /// </summary>
-static class SpecialCavesMapPositionSetup
+public static class SpecialCavesMapPositionSetup
 {
     // TODO Parameters will prepare for random position generation later on
     // TODO make sure cave positions are inside playing area depending on size of map
@@ -168,10 +169,10 @@ static class SpecialCavesMapPositionSetup
 }
 
 /// <summary>
-/// Structs instead of classes - problem is that structs cannot be null when not needed having been 'shot'!
+/// Structs instead of classes - problem is that structs cannot be null when no longer needed
 /// </summary>
 /// <param name="Caves">The playing board</param>
-public record BoardObjectStructs(ICave[,] Caves)
+public class BoardObjectPositions(ICave[,] Caves)
 {
     public ICave[,] Caves { get; private set; } = Caves;
 
@@ -270,7 +271,7 @@ public record BoardObjectStructs(ICave[,] Caves)
             if (this.Row == row && this.Column == column)
             {
                 ForegroundColor = ConsoleColor.Green;
-                WriteLine("\nThe roaring of the Maelstrom diminishes as it subsides into a fragrant zephyr.\n");
+                WriteLine("The roaring of the Maelstrom fades into a fragrant zephyr.");
                 ResetColor();
 
                 return true;
@@ -308,7 +309,7 @@ public record BoardObjectStructs(ICave[,] Caves)
             if (this.Row == row && this.Column == column)
             {
                 ForegroundColor = ConsoleColor.Yellow;
-                WriteLine("\nYou hear the whines and yelps of the fatally stricken Amarok. It will trouble you no more!\n");
+                WriteLine("You hear whines and yelps from the fatally stricken Amarok. It will trouble you no more!\n");
                 ResetColor();
 
                 return true;
@@ -321,7 +322,7 @@ public record BoardObjectStructs(ICave[,] Caves)
     /// <summary>
     /// Beginning game setup
     /// </summary>
-    public void StartupScreen()
+    public void StartupScreens()
     {
         Console.Title = "The quest for the Fountain of Objects";
         Console.Clear();
@@ -339,19 +340,19 @@ public record BoardObjectStructs(ICave[,] Caves)
 
             Once upon a time, in a galaxy far, far away ...
 
-            You, a fearless adventurer, enters the Cavern of Objects, a maze of caves filled with dangerous pits while searching of the Fountain of Objects.
+            You, a fearless adventurer, enters the Cavern of Objects, a maze of caves filled with dangerous pits while searching for the Fountain of Objects.
 
             Light is visible only in the entrance, little other light is seen anywhere in the cavern.  You must navigate the caverns with your senses. Find the Fountain of Objects, activate it, and return to the entrance.
             
             Look out for Pits, you will feel a breeze if a pit is nearby. If you enter a cave with a pit, you will fall eternally.
 
-            Maelstroms are violent forces of sentient wind. Enter a cave with one will violently eject you to another one. You will be able to hear the growling and groaning from nearby caves.
+            Maelstroms are violent forces of sentient wind. Enter a cave with one and you will be violently ejected into another cave. You will be able to hear the growling and groaning from nearby caves.
 
             Amaroks roam the caverns. Encountering one is certain death, you can smell their rotten stench for caves around.
 
-            If you carry with you a bow and a quiver of arrows, you can shoot the monsters in nearby caves but beware, you have a limited supply of arrows so don't waste them.
+            If you carry with you a bow and a quiver of arrows, you can shoot the monsters in adjacent caves but beware, you have a limited supply of arrows so don't waste them.
 
-            Typing 'Help' or ('H' for short) will show a list of the commands available to you while in the cavern.
+            Typing 'Help' or ('H' for short) will show a list of the commands with which you navigate the Cavern.
 
             """;
         return _menu;
@@ -360,7 +361,7 @@ public record BoardObjectStructs(ICave[,] Caves)
     /// <summary>
     /// Fill the play area with background noise.
     /// </summary>
-    /// <returns>A board full of empty caves</returns>
+    /// <returns>A board full of 'empty' caves</returns>
 
     public ICave[,] FillEmptyCaves()
     {
@@ -424,7 +425,7 @@ public class PlayTheGame
         _gamePlayer.Arrows = 5;
     }
 
-    internal void PositionTheBaseObjects()
+    public void PositionTheBaseObjects()
     {
         int _rowMax = PlayArea.GetUpperBound(0);
         int _colMax = PlayArea.GetUpperBound(1);
@@ -443,7 +444,7 @@ public class PlayTheGame
         PlayArea[_row, _column] = new CavernEntrance();
     }
 
-    internal void FillTheBoardWithPerils()
+    public void FillTheBoardWithPerils()
     {
         // Using the factory output, fill the object position Structs and complete the board according to the Expansions.
         // Using board sizes directly from the board (arrays) to avoid index out of bounds errors
@@ -460,8 +461,6 @@ public class PlayTheGame
 
         int _row;
         int _column;
-
-
 
         _pitPosition1 = new();
         (_row, _column) = PitCavePosition1(_rowMax, _colMax);
@@ -683,13 +682,11 @@ public class PlayTheGame
         // Is the player is at fountain position?
         if (_fountainPosition.PlayerIsTheSameAs(_gamePlayer))
         {
-            // Change messages
-            ActivatedFountainCave _activeFountain = new();
-            PlayArea[_gamePlayer.Row, _gamePlayer.Column] = _activeFountain;
+            // Change fountain message
+            PlayArea[_gamePlayer.Row, _gamePlayer.Column] = new ActivatedFountainCave();
 
             // Change cavern entrance message.
-            ActivatedCavernEntrance _activeEntrance = new();
-            PlayArea[_entrancePosition.Row, _entrancePosition.Column] = _activeEntrance;
+            PlayArea[_entrancePosition.Row, _entrancePosition.Column] = new ActivatedCavernEntrance();
         }
         // Nope!
         else WriteLine("Can't be done - you  have to be present in the fountain cave to do that!");
@@ -1104,6 +1101,7 @@ public interface ICave
     string ToString();
 }
 
+
 public class CavernEntrance : ICave
 {
     public string Description { get; private set; }
@@ -1176,7 +1174,7 @@ public class ABottomlessPit : ICave
     public string Description { get; private set; }
     public ABottomlessPit()
     {
-        Description = "You have fallen into a bottomless pit. Good luck with that!  See you in the next life. Bye .... ";
+        Description = "You have fallen into a bottomless pit. So sad!  See you in the next life. Bye .... ";
     }
 
     public override string ToString()
