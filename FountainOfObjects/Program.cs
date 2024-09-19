@@ -20,6 +20,7 @@ using static System.Console;
 // Expansion 5 - Bows and arrows - completed for 4 cardinal points
 // Expansion 6 - Instructions and help - Completed ...
 
+// Version 19th September 2024.
 
 // TODO Refactor the program into separate class based files / name spaces / directory structure
 
@@ -1084,7 +1085,8 @@ public class PlayTheGame
             'Move South' or 'South' or 'S'  => Move to the South
             'Move West' or 'West' or 'W'  => Move to the West
 
-            'Attack' or 'Shoot' or 'Loose' will allow shooting at monsters.
+            'Attack' or 'Shoot' or 'Loose' will enable you to shoot at monsters.
+            "Enable Fountain" or "Enable" or "Activate" to restart the Fountain.
 
             """;
         WriteLine(_helpMenu);
