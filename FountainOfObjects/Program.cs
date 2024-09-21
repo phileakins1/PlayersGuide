@@ -43,7 +43,7 @@ _play.GetPlayerChoice();
 
 public class SelectCavernSize
 {
-    protected SelectCavernSize() { }
+    SelectCavernSize() { }
 
     // TODO setup future X and Y choices for a custom size cavern 
 
@@ -52,7 +52,7 @@ public class SelectCavernSize
     /// </summary>
     /// <returns>A tuple with the row and column numerations for its creation.</returns>
 
-    internal static (int, int) GetCavernSize()
+    public static (int, int) GetCavernSize()
     {
         (int, int) _size = (0, 0);
         string? _choice;
@@ -170,7 +170,7 @@ public static class SpecialCavesMapPositionSetup
 }
 
 /// <summary>
-/// Structs instead of classes - problem is that structs cannot be null when no longer needed
+/// Structs instead of classes - problem is that structs cannot be null when no longer needed to allow collection
 /// </summary>
 /// <param name="Caves">The playing board</param>
 public class BoardObjectPositions(ICave[,] Caves)
@@ -310,7 +310,7 @@ public class BoardObjectPositions(ICave[,] Caves)
             if (this.Row == row && this.Column == column)
             {
                 ForegroundColor = ConsoleColor.Yellow;
-                WriteLine("You hear whines and yelps from the fatally stricken Amarok. It will trouble you no more!\n");
+                WriteLine("You hear whines and yelps of a fatally stricken Amarok. It will trouble you no more!\n");
                 ResetColor();
 
                 return true;
@@ -422,6 +422,7 @@ public class PlayTheGame
         _gamePlayer.Row = _entrancePosition.Row;
         _gamePlayer.Column = _entrancePosition.Column;
 
+        // Armed and dangerous
         _gamePlayer.Bow = true;
         _gamePlayer.Arrows = 5;
     }
@@ -690,7 +691,7 @@ public class PlayTheGame
             PlayArea[_entrancePosition.Row, _entrancePosition.Column] = new ActivatedCavernEntrance();
         }
         // Nope!
-        else WriteLine("Can't be done - you  have to be present in the fountain cave to do that!");
+        else WriteLine("\nCan't be done - you  have to be present in the fountain cave to do that!");
 
         return true;
     }
@@ -1176,7 +1177,7 @@ public class ABottomlessPit : ICave
     public string Description { get; private set; }
     public ABottomlessPit()
     {
-        Description = "You have fallen into a bottomless pit. So sad!  See you in the next life. Bye .... ";
+        Description = "You have blundered into a bottomless pit. So sad!  See you in the next life. Bye .... ";
     }
 
     public override string ToString()
