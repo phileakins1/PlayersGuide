@@ -1,13 +1,11 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-
 // Ignore Spelling: Amarok Amarock
 
 // Experimental static usings.
 using static BoardObjectPositions;
 using static SpecialCavesMapPositionSetup;
 using static System.Console;
-
 
 // Using The Book with the C# 11 Expansion
 // C# Players Guide Fountain of Objects Challenge. - 1000 XP at stake
@@ -20,39 +18,41 @@ using static System.Console;
 // Expansion 5 - Bows and arrows - completed for 4 cardinal points
 // Expansion 6 - Instructions and help - Completed ...
 
-// Version 19th September 2024.
+// Refactored Version 25th September 2024.
 
 // TODO Refactor the program into separate class based files / name spaces / directory structure
 
 // Create the game board
 (int _row, int _columns) = SelectCavernSize.GetCavernSize();
 ICave[,] _caves = new ICave[_row, _columns];
-BoardObjectPositions _playArea = new(_caves);
+
+// Initialize the board positions sending the _caves array as a class declaration level parameter
+BoardObjectPositions playArea = new(_caves);
 
 // Window title and Instructions
-_playArea.StartupScreens();
+playArea.StartupScreens();
 
-// Add background caves
-_caves = _playArea.FillEmptyCaves();
+// Fill the array with background cave objects
+_caves = playArea.FillEmptyCaves();
 
-// Create the game structure
-PlayTheGame _play = new(_caves);
+// Create the game board sending a parameter of the array of  'empty caves'
+PlayTheGame play = new(_caves);
 
 // Start the game loop
-_play.GetPlayerChoice();
+play.GetPlayerChoice();
 
 public class SelectCavernSize
 {
-    SelectCavernSize() { }
+    private SelectCavernSize() { }
 
-    // TODO setup future X and Y choices for a custom size cavern 
+    // TODO setup future X and Y choices for a custom size cavern
 
     /// <summary>
     /// Establishes the playing board size.
     /// </summary>
     /// <returns>A tuple with the row and column numerations for its creation.</returns>
 
-    public static (int, int) GetCavernSize()
+    public static (int row, int column) GetCavernSize()
     {
         (int, int) _size = (0, 0);
         string? _choice;
@@ -88,15 +88,14 @@ public class SelectCavernSize
 
     private static void WriteBoardSizeMenu()
     {
-        string _menu = """
-            Choose the size of the cavern
-
-             S for a small (4 X 4) cavern
-             M for a medium (6 X 6) cavern
-             L for a large (8 X 8) cavern
-            """;
-
-        WriteLine(_menu);
+        WriteLine(
+          """
+                    Choose the size of the cavern
+        
+                    S for a small (4 X 4) cavern
+                    M for a medium (6 X 6) cavern
+                    L for a large (8 X 8) cavern
+                    """);
     }
 }
 
@@ -107,70 +106,79 @@ public static class SpecialCavesMapPositionSetup
 {
     // TODO Parameters will prepare for random position generation later on
     // TODO make sure cave positions are inside playing area depending on size of map
+    // TODO add a random position arrow cache to the L board
 
-    public static (int, int) FountainCavePosition(int rowMax, int columnMax)
+    public static (int row, int column) EntranceCavePosition(int rowMax, int columnMax)
+    {
+        return (0, 0);
+    }
+    public static (int row, int column) FountainCavePosition(int rowMax, int columnMax)
     {
         return (0, 2);
     }
 
-    public static (int, int) EntranceCavePosition(int rowMax, int columnMax)
-    {
-        return (0, 0);
-    }
 
     //  Pits S 1 - 2 M - 4 L
-    public static (int, int) PitCavePosition1(int rowMax, int columnMax)
+    public static (int row, int column) PitCavePosition1(int rowMax, int columnMax)
     {
         return (1, 1);
     }
-    public static (int, int) PitCavePosition2(int rowMax, int columnMax)
+
+    public static (int row, int column) PitCavePosition2(int rowMax, int columnMax)
     {
         return (4, 5);
     }
-    public static (int, int) PitCavePosition3(int rowMax, int columnMax)
+
+    public static (int row, int column) PitCavePosition3(int rowMax, int columnMax)
     {
         return (6, 4);
     }
-    public static (int, int) PitCavePosition4(int rowMax, int columnMax)
+
+    public static (int row, int column) PitCavePosition4(int rowMax, int columnMax)
     {
         return (2, 6);
     }
 
     // Maelstroms 1 S - 1 M - 2 L
-    public static (int, int) MaelstromCavePosition1(int rowMax, int columnMax)
+    public static (int row, int column) MaelstromCavePosition1(int rowMax, int columnMax)
     {
         return (2, 2);
     }
-    public static (int, int) MaelstromCavePosition2(int rowMax, int columnMax)
+
+    public static (int row, int column) MaelstromCavePosition2(int rowMax, int columnMax)
     {
         return (4, 3);
     }
-    public static (int, int) MaelstromCavePosition3(int rowMax, int columnMax)
+
+    public static (int row, int column) MaelstromCavePosition3(int rowMax, int columnMax)
     {
         return (5, 6);
     }
-    public static (int, int) MaelstromCavePosition4(int rowMax, int columnMax)
+
+    public static (int row, int column) MaelstromCavePosition4(int rowMax, int columnMax)
     {
         return (6, 2);
     }
 
-    // Amaroks  1 S - 2 M - 3 L
-    public static (int, int) AmarokCavePosition1(int rowMax, int columnMax)
+    // Amarocks  1 S - 2 M - 3 L
+    public static (int row, int column) AmarockCavePosition1(int rowMax, int columnMax)
     {
         return (3, 0);
     }
-    public static (int, int) AmarokCavePosition2(int rowMax, int columnMax)
+
+    public static (int row, int column) AmarockCavePosition2(int rowMax, int columnMax)
     {
         return (5, 1);
     }
-    public static (int, int) AmarokCavePosition3(int rowMax, int columnMax)
+
+    public static (int row, int column) AmarockCavePosition3(int rowMax, int columnMax)
     {
         return (7, 6);
     }
 }
 
 /// <summary>
-/// Structs instead of classes - problem is that structs cannot be null when no longer needed to allow collection
+/// Structs instead of classes - problem is that structs cannot be null when no longer needed to allow collection - set position off board.
 /// </summary>
 /// <param name="Caves">The playing board</param>
 public class BoardObjectPositions(ICave[,] Caves)
@@ -184,137 +192,75 @@ public class BoardObjectPositions(ICave[,] Caves)
 
         public int Row { get; set; }
         public int Column { get; set; }
+
         public PlayerPosition() { }
     }
 
-    public struct FountainPosition
+    /// <summary>
+    ///  BaseObjectPosition has base members which PerilPosition could use but which cannot be inherited.
+    /// </summary>
+
+    public struct BaseObjectPosition
     {
         public int Row { get; set; }
         public int Column { get; set; }
-        public FountainPosition() { }
 
-        // No need for a message if the player is adjacent.
-        public bool PlayerIsTheSameAs(PlayerPosition player)
+        public BaseObjectPosition(int row, int column)
+        {
+            Row = row;
+            Column = column;
+        }
+
+        public readonly bool PlayerIsTheSameAs(PlayerPosition player)
         {
             if (this.Row == player.Row && this.Column == player.Column) return true;
             else return false;
         }
 
-        public bool IsTheSameAs(int row, int column)
+        public readonly bool IsTheSameAs(int row, int column)
         {
             if (this.Row == row && this.Column == column) return true;
             else return false;
         }
     }
-    public struct EntrancePosition
+
+    /// <summary>
+    ///  PerilPositions (Qua Interface Segregation Principle - adds arrow position on top of Base conditions ).
+    /// </summary>
+    public struct PerilPosition
     {
         public int Row { get; set; }
         public int Column { get; set; }
 
-        public EntrancePosition() { }
+        public PerilPosition(int row, int column)
+        {
+            Row = row;
+            Column = column;
+        }
 
-        public bool PlayerIsTheSameAs(int row, int column)
+        public readonly bool PlayerIsTheSameAs(PlayerPosition player)
+        {
+            if (this.Row == player.Row && this.Column == player.Column) return true;
+            else return false;
+        }
+
+        public readonly bool IsTheSameAs(int row, int column)
         {
             if (this.Row == row && this.Column == column) return true;
             else return false;
         }
-    }
-    public struct PitPosition
-    {
-        public int Row { get; set; }
-        public int Column { get; set; }
 
-        public PitPosition() { }
-
-        public void IsAdjacentTo(PlayerPosition player)
-        {
-            // TODO Detection wraps  round the edges of the board (ie player at (1,0) detects a peril at (1, 7) and adjacently at (0, 0 & 2, 0)
-            if (!(this.Row - player.Row is < -1 or > 1 || this.Column - player.Column is < -1 or > 1) && (!PlayerIsTheSameAs(player)))
-            {
-                ForegroundColor = ConsoleColor.Red;
-                WriteLine("You feel a draught, There is a pit nearby!");
-                ResetColor();
-            }
-        }
-        public bool PlayerIsTheSameAs(PlayerPosition player)
-        {
-            if (this.Row == player.Row && this.Column == player.Column) return true;
-            else return false;
-        }
-    }
-
-    public struct MaelstromPosition
-    {
-        public int Row { get; set; }
-        public int Column { get; set; }
-
-        public MaelstromPosition() { }
-
-        public void IsAdjacentTo(PlayerPosition player)
-        {
-            // TODO Wrap round.
-            if (!(this.Row - player.Row is < -1 or > 1 || this.Column - player.Column is < -1 or > 1) && (!PlayerIsTheSameAs(player)))
-            {
-                ForegroundColor = ConsoleColor.Green;
-                WriteLine("You hear the growling and groaning of a Maelstrom nearby!");
-                ResetColor();
-            }
-        }
-
-        public bool PlayerIsTheSameAs(PlayerPosition player)
-        {
-            if (this.Row == player.Row && this.Column == player.Column) return true;
-            else return false;
-        }
-
-        public bool ArrowIsTheSameAs(int row, int column)
+        public readonly bool ArrowIsTheSameAs(int row, int column)
         {
             if (this.Row == row && this.Column == column)
-            {
-                ForegroundColor = ConsoleColor.Green;
-                WriteLine("The roaring of the Maelstrom fades into a fragrant zephyr.");
-                ResetColor();
-
                 return true;
-            }
             else return false;
         }
-    }
 
-    public struct AmarokPosition
-    {
-        public int Row { get; set; }
-        public int Column { get; set; }
-
-        public AmarokPosition() { }
-
-        public void IsAdjacentTo(PlayerPosition player)
+        public readonly bool PlayerIsAdjacentTo(PlayerPosition player)
         {
-            // TODO Wrap round.
             if (!(this.Row - player.Row is < -1 or > 1 || this.Column - player.Column is < -1 or > 1) && (!PlayerIsTheSameAs(player)))
-            {
-                ForegroundColor = ConsoleColor.Yellow;
-                WriteLine("You smell the rotten stench of an Amarok in a nearby cave!");
-                ResetColor();
-            }
-        }
-
-        public bool PlayerIsTheSameAs(PlayerPosition player)
-        {
-            if (this.Row == player.Row && this.Column == player.Column) return true;
-            else return false;
-        }
-
-        public bool ArrowIsTheSameAs(int row, int column)
-        {
-            if (this.Row == row && this.Column == column)
-            {
-                ForegroundColor = ConsoleColor.Yellow;
-                WriteLine("You hear whines and yelps of a fatally stricken Amarok. It will trouble you no more!\n");
-                ResetColor();
-
                 return true;
-            }
             else return false;
         }
     }
@@ -332,7 +278,6 @@ public class BoardObjectPositions(ICave[,] Caves)
 
         Write("Press any key to continue:  ");
         Console.ReadLine();
-
     }
 
     public static string StartUpMenu()
@@ -341,19 +286,19 @@ public class BoardObjectPositions(ICave[,] Caves)
 
             Once upon a time, in a galaxy far, far away ...
 
-            You, a fearless adventurer, enters the Cavern of Objects, a maze of caves filled with dangerous pits while searching for the Fountain of Objects.
+            You, a fearless adventurer, enters the Cavern of Objects, a maze of caves filled with dangerous pits to activate the Fountain of Objects.
 
             Light is visible only in the entrance, little other light is seen anywhere in the cavern.  You must navigate the caverns with your senses. Find the Fountain of Objects, activate it, and return to the entrance.
-            
+
             Look out for Pits, you will feel a breeze if a pit is nearby. If you enter a cave with a pit, you will fall eternally.
 
             Maelstroms are violent forces of sentient wind. Enter a cave with one and you will be violently ejected into another cave. You will be able to hear the growling and groaning from nearby caves.
 
-            Amaroks roam the caverns. Encountering one is certain death, you can smell their rotten stench for caves around.
+            Amaroks roam the caverns. Encountering one is certain death, but you can smell their rotten stench for caves around.
 
-            If you carry with you a bow and a quiver of arrows, you can shoot the monsters in adjacent caves but beware, you have a limited supply of arrows so don't waste them.
+            If you carry with you a bow and a quiver of arrows, you can shoot at the monsters in adjacent caves but beware, you have a limited supply of arrows so don't waste them.
 
-            Typing 'Help' or ('H' for short) will show a list of the commands with which you navigate the Cavern.
+            Typing 'Help' or ('H' for short) will show a list of commands which will help you navigate the Cavern.
 
             """;
         return _menu;
@@ -366,7 +311,6 @@ public class BoardObjectPositions(ICave[,] Caves)
 
     public ICave[,] FillEmptyCaves()
     {
-
         for (int i = 0; i < Caves.GetUpperBound(0) + 1; i++)
         {
             for (int j = 0; j < Caves.GetUpperBound(1) + 1; j++)
@@ -383,23 +327,18 @@ public class BoardObjectPositions(ICave[,] Caves)
 /// </summary>
 public class PlayTheGame
 {
-    PlayerPosition _gamePlayer = new();
-    EntrancePosition _entrancePosition = new();
-    FountainPosition _fountainPosition = new();
+    PlayerPosition gamePlayer;
 
-    PitPosition _pitPosition1;
-    PitPosition _pitPosition2;
-    PitPosition _pitPosition3;
-    PitPosition _pitPosition4;
+    // Dictionary - identified individual positions are needed
+    private readonly Dictionary<string, BaseObjectPosition> baseObjectPositions = [];
 
-    MaelstromPosition _maestromPosition1;
-    MaelstromPosition _maestromPosition2;
-    MaelstromPosition _maestromPosition3;
-    MaelstromPosition _maestromPosition4;
+    // List as need a way to iterate through several times.
+    // TODO Amalgamate perils Lists? Will not need to separate out different perils - BUT Pits cannot be shot, although arrows can be wasted on them.
 
-    AmarokPosition _amarockPosition1;
-    AmarokPosition _amarockPosition2;
-    AmarokPosition _amarockPosition3;
+    private readonly List<PerilPosition> pitPositions = [];
+    private readonly List<PerilPosition> amarokPositions = [];
+    private readonly List<PerilPosition> maelstromPositions = [];
+
 
     /// <summary>
     /// The playing board.
@@ -410,40 +349,36 @@ public class PlayTheGame
     /// Set up the playing area caves calculated on the size of the board
     /// </summary>
     /// <param name="playArea">The board with background setup to be populated with the interesting bits</param>
-
     public PlayTheGame(ICave[,] playArea)
     {
         PlayArea = playArea;
-
         PositionTheBaseObjects();
         FillTheBoardWithPerils();
 
-        // Player always starts at the entrance - wherever that might end up
-        _gamePlayer.Row = _entrancePosition.Row;
-        _gamePlayer.Column = _entrancePosition.Column;
+        // Player always starts at the _entrance - wherever that might end up
+        gamePlayer = new() { Row = baseObjectPositions["entrance"].Row, Column = baseObjectPositions["entrance"].Column };
 
         // Armed and dangerous
-        _gamePlayer.Bow = true;
-        _gamePlayer.Arrows = 5;
+        gamePlayer.Bow = true;
+        gamePlayer.Arrows = 5;
     }
 
     public void PositionTheBaseObjects()
     {
-        int _rowMax = PlayArea.GetUpperBound(0);
-        int _colMax = PlayArea.GetUpperBound(1);
+        //TODO Add the arrow cache  to L and larger boards
 
-        int _row;
-        int _column;
+        int rowMax = PlayArea.GetUpperBound(0);
+        int colMax = PlayArea.GetUpperBound(1);
 
-        (_row, _column) = FountainCavePosition(_rowMax, _colMax);
-        _fountainPosition.Row = _row;
-        _fountainPosition.Column = _column;
-        PlayArea[_row, _column] = new FountainCave();
+        var _fountain = FountainCavePosition(rowMax, colMax);
+        BaseObjectPosition fountainPosition = new() { Row = _fountain.row, Column = _fountain.column };
+        PlayArea[_fountain.row, _fountain.column] = new FountainCave();
+        baseObjectPositions["fountain"] = fountainPosition;
 
-        (_row, _column) = EntranceCavePosition(_rowMax, _colMax);
-        _entrancePosition.Row = _row;
-        _entrancePosition.Column = _column;
-        PlayArea[_row, _column] = new CavernEntrance();
+        var _entrance = EntranceCavePosition(rowMax, colMax);
+        BaseObjectPosition entrancePosition = new() { Row = _entrance.row, Column = _entrance.column };
+        PlayArea[_entrance.row, _entrance.column] = new CavernEntrance();
+        baseObjectPositions["entrance"] = entrancePosition;
     }
 
     public void FillTheBoardWithPerils()
@@ -458,123 +393,102 @@ public class PlayTheGame
 
     private void PositionPitsOnBoard()
     {
-        int _rowMax = PlayArea.GetUpperBound(0);
-        int _colMax = PlayArea.GetUpperBound(1);
+        int rowMax = PlayArea.GetUpperBound(0);
+        int colMax = PlayArea.GetUpperBound(1);
 
-        int _row;
-        int _column;
+        var _pit = PitCavePosition1(rowMax, colMax);
+        PerilPosition pitPosition1 = new() { Row = _pit.row, Column = _pit.column };
+        PlayArea[_pit.row, _pit.column] = new BottomlessPit();
+        pitPositions.Add(pitPosition1);
 
-        _pitPosition1 = new();
-        (_row, _column) = PitCavePosition1(_rowMax, _colMax);
-        _pitPosition1.Row = _row;
-        _pitPosition1.Column = _column;
-        PlayArea[_row, _column] = new ABottomlessPit();
-
-        // Extra pit on Medium board 
-        if (_rowMax > 3)
+        // Extra pit on Medium board
+        if (rowMax > 3)
         {
-            _pitPosition2 = new();
-            (_row, _column) = PitCavePosition2(_rowMax, _colMax);
-            _pitPosition2.Row = _row;
-            _pitPosition2.Column = _column;
-            PlayArea[_row, _column] = new ABottomlessPit();
-        }
+            _pit = PitCavePosition2(rowMax, colMax);
+            PerilPosition pitPosition2 = new() { Row = _pit.row, Column = _pit.column };
+            PlayArea[_pit.row, _pit.column] = new BottomlessPit();
+            pitPositions.Add(pitPosition2);
 
-        // 2 extra pits on Large board
-        if (_rowMax > 5)
-        {
-            _pitPosition3 = new();
-            (_row, _column) = PitCavePosition3(_rowMax, _colMax);
-            _pitPosition3.Row = _row;
-            _pitPosition3.Column = _column;
-            PlayArea[_row, _column] = new ABottomlessPit();
+            // 2 extra pits on Large board
+            if (rowMax > 5)
+            {
+                _pit = PitCavePosition3(rowMax, colMax);
+                PerilPosition pitPosition3 = new() { Row = _pit.row, Column = _pit.column };
+                PlayArea[_pit.row, _pit.column] = new BottomlessPit();
+                pitPositions.Add(pitPosition3);
 
-            _pitPosition4 = new();
-            (_row, _column) = PitCavePosition4(_rowMax, _colMax);
-            _pitPosition4.Row = _row;
-            _pitPosition4.Column = _column;
-            PlayArea[_row, _column] = new ABottomlessPit();
+                _pit = PitCavePosition4(rowMax, colMax);
+                PerilPosition pitPosition4 = new() { Row = _pit.row, Column = _pit.column };
+                PlayArea[_pit.row, _pit.column] = new BottomlessPit();
+                pitPositions.Add(pitPosition4);
+            }
         }
     }
 
     private void PositionMaelstromsOnBoard()
     {
-        int _rowMax = PlayArea.GetUpperBound(0);
-        int _colMax = PlayArea.GetUpperBound(1);
-
-        int _row;
-        int _column;
+        int rowMax = PlayArea.GetUpperBound(0);
+        int colMax = PlayArea.GetUpperBound(1);
 
         // Initial Maelstrom
-        _maestromPosition1 = new();
-        (_row, _column) = MaelstromCavePosition1(_rowMax, _colMax);
-        _maestromPosition1.Row = _row;
-        _maestromPosition1.Column = _column;
-        PlayArea[_row, _column] = new AMaelstrom();
 
+        var _maelstrom = MaelstromCavePosition1(rowMax, colMax);
+        PerilPosition maestromPosition1 = new() { Row = _maelstrom.row, Column = _maelstrom.column };
+        PlayArea[_maelstrom.row, maestromPosition1.Column] = new AMaelstrom();
+        maelstromPositions.Add(maestromPosition1);
 
-        // Medium board  plus one extra Maelstrom 
-        if (_rowMax > 3)
+        // Medium board  plus one extra Maelstrom
+        if (rowMax > 3)
         {
-            _maestromPosition2 = new();
-            (_row, _column) = MaelstromCavePosition2(_rowMax, _colMax);
-            _maestromPosition2.Row = _row;
-            _maestromPosition2.Column = _column;
-            PlayArea[_row, _column] = new AMaelstrom();
-        }
+            _maelstrom = MaelstromCavePosition2(rowMax, colMax);
+            PerilPosition maestromPosition2 = new() { Row = _maelstrom.row, Column = _maelstrom.column };
+            PlayArea[_maelstrom.row, _maelstrom.column] = new AMaelstrom();
+            maelstromPositions.Add(maestromPosition2);
 
-        // Large board plus two extra
-        if (_rowMax > 5)
-        {
-            _maestromPosition3 = new();
-            (_row, _column) = MaelstromCavePosition3(_rowMax, _colMax);
-            _maestromPosition3.Row = _row;
-            _maestromPosition3.Column = _column;
-            PlayArea[_row, _column] = new AMaelstrom();
+            // Large board plus two extra
+            if (rowMax > 5)
+            {
+                _maelstrom = MaelstromCavePosition3(rowMax, colMax);
+                PerilPosition maestromPosition3 = new() { Row = _maelstrom.row, Column = _maelstrom.column };
+                PlayArea[_maelstrom.row, _maelstrom.column] = new AMaelstrom();
+                maelstromPositions.Add(maestromPosition3);
 
-            _maestromPosition4 = new();
-            (_row, _column) = MaelstromCavePosition4(_rowMax, _colMax);
-            _maestromPosition4.Row = _row;
-            _maestromPosition4.Column = _column;
-            PlayArea[_row, _column] = new AMaelstrom();
+                _maelstrom = MaelstromCavePosition4(rowMax, colMax);
+                PerilPosition maestromPosition4 = new() { Row = _maelstrom.row, Column = _maelstrom.column };
+                PlayArea[_maelstrom.row, _maelstrom.column] = new AMaelstrom();
+                maelstromPositions.Add(maestromPosition4);
+            }
         }
     }
 
     private void PositionAmaroksOnBoard()
     {
-        int _rowMax = PlayArea.GetUpperBound(0);
-        int _colMax = PlayArea.GetUpperBound(1);
-
-        int _row;
-        int _column;
+        int rowMax = PlayArea.GetUpperBound(0);
+        int colMax = PlayArea.GetUpperBound(1);
 
         // initial Amarok
 
-        _amarockPosition1 = new();
-        (_row, _column) = AmarokCavePosition1(_rowMax, _colMax);
-        _amarockPosition1.Row = _row;
-        _amarockPosition1.Column = _column;
-        PlayArea[_row, _column] = new AnAmarock();
+        var _amarock = AmarockCavePosition1(rowMax, colMax);
+        PerilPosition _amarockPosition1 = new() { Row = _amarock.row, Column = _amarock.column };
+        PlayArea[_amarock.row, _amarock.column] = new AnAmarock();
+        amarokPositions.Add(_amarockPosition1);
 
-
-        // Medium board  plus one  Amarok 
-        if (_rowMax > 3)
+        // Medium board  plus one  Amarok
+        if (rowMax > 3)
         {
-            _amarockPosition2 = new();
-            (_row, _column) = AmarokCavePosition2(_rowMax, _colMax);
-            _amarockPosition2.Row = _row;
-            _amarockPosition2.Column = _column;
-            PlayArea[_row, _column] = new AnAmarock();
-        }
+            _amarock = AmarockCavePosition2(rowMax, colMax);
+            PerilPosition _amarockPosition2 = new() { Row = _amarock.row, Column = _amarock.column };
+            PlayArea[_amarock.row, _amarock.column] = new AnAmarock();
+            amarokPositions.Add(_amarockPosition2);
 
-        // Large board plus one more Amarok
-        if (_rowMax > 5)
-        {
-            _amarockPosition3 = new();
-            (_row, _column) = AmarokCavePosition3(_rowMax, _colMax);
-            _amarockPosition3.Row = _row;
-            _amarockPosition3.Column = _column;
-            PlayArea[_row, _column] = new AnAmarock();
+            // Large board plus one more Amarok
+            if (rowMax > 5)
+            {
+                _amarock = AmarockCavePosition3(rowMax, colMax);
+                PerilPosition _amarockPosition3 = new() { Row = _amarock.row, Column = _amarock.column };
+                PlayArea[_amarock.row, _amarock.column] = new AnAmarock();
+                amarokPositions.Add(_amarockPosition3);
+            }
         }
     }
 
@@ -599,32 +513,31 @@ public class PlayTheGame
 
             CheckForMaelstroms();
 
-            WriteLine($"You are in the cave at ({_gamePlayer.Row}, {_gamePlayer.Column})");
+            WriteLine($"You are in the cave at ({gamePlayer.Row}, {gamePlayer.Column})");
 
-            if (_gamePlayer.Arrows > 0)
+            if (gamePlayer.Arrows > 0)
             {
-                WriteLine($"You have a bow and {_gamePlayer.Arrows} arrows.");
+                WriteLine($"You have a bow and {gamePlayer.Arrows} arrows.");
             }
 
             // Print cave description before moving player.
-            PlayArea[_gamePlayer.Row, _gamePlayer.Column].ToString();
+            PlayArea[gamePlayer.Row, gamePlayer.Column].ToString();
 
             string _playerMovement = GetMovementInstruction().ToLower().Trim();
 
             _validResponse = _playerMovement switch
             {
-                "move east" or "east" or "e" => MoveEast(),
-                "move west" or "west" or "w" => MoveWest(),
-                "move north" or "north" or "n" => MoveNorth(),
-                "move south" or "south" or "s" => MoveSouth(),
-                "enable fountain" or "enable" or "activate" => EnableFountain(),
+                "move east" or "east" or "e" => MovePlayerEast(),
+                "move west" or "west" or "w" => MovePlayerWest(),
+                "move north" or "north" or "n" => MovePlayerNorth(),
+                "move south" or "south" or "s" => MovePlayerSouth(),
+                "enable _fountain" or "enable" or "activate" => EnableFountain(),
                 "attack" or "shoot" or "loose" or "a" => Attack(),
                 "help" or "h" => PrintHelp(),
                 "quit" or "exit" or "q" => false,
                 _ => true
             };
         } while (_validResponse);
-
     }
 
     private static string GetMovementInstruction()
@@ -642,75 +555,74 @@ public class PlayTheGame
     /// </summary>
     /// <returns> Returns new position </returns>
 
-    private bool MoveEast()
+    private bool MovePlayerEast()
     {
-        if (_gamePlayer.Column + 1
-            > PlayArea.GetUpperBound(0)) _gamePlayer.Column = PlayArea.GetLowerBound(0);
-        else _gamePlayer.Column++;
+        if (gamePlayer.Column + 1
+            > PlayArea.GetUpperBound(0)) gamePlayer.Column = PlayArea.GetLowerBound(0);
+        else gamePlayer.Column++;
 
         return true;
     }
 
-    private bool MoveWest()
+    private bool MovePlayerWest()
     {
-
-        if (_gamePlayer.Column - 1
-            < PlayArea.GetLowerBound(0)) _gamePlayer.Column = PlayArea.GetUpperBound(0);
-        else _gamePlayer.Column--;
+        if (gamePlayer.Column - 1
+            < PlayArea.GetLowerBound(0)) gamePlayer.Column = PlayArea.GetUpperBound(0);
+        else gamePlayer.Column--;
 
         return true;
     }
 
-    private bool MoveNorth()
+    private bool MovePlayerNorth()
     {
-        if (_gamePlayer.Row - 1
-            < PlayArea.GetLowerBound(1)) _gamePlayer.Row = PlayArea.GetUpperBound(1);
-        else _gamePlayer.Row--;
+        if (gamePlayer.Row - 1
+            < PlayArea.GetLowerBound(1)) gamePlayer.Row = PlayArea.GetUpperBound(1);
+        else gamePlayer.Row--;
 
         return true;
     }
 
-    private bool MoveSouth()
+    private bool MovePlayerSouth()
     {
-        if (_gamePlayer.Row + 1
-            > PlayArea.GetUpperBound(1)) _gamePlayer.Row = PlayArea.GetLowerBound(1);
-        else _gamePlayer.Row++;
+        if (gamePlayer.Row + 1
+            > PlayArea.GetUpperBound(1)) gamePlayer.Row = PlayArea.GetLowerBound(1);
+        else gamePlayer.Row++;
 
         return true;
     }
 
     private bool EnableFountain()
     {
-        // Is the player is at fountain position?
-        if (_fountainPosition.PlayerIsTheSameAs(_gamePlayer))
+        // Is the player is at _fountain position?
+        if (baseObjectPositions["fountain"].PlayerIsTheSameAs(gamePlayer))
         {
-            // Change fountain message
-            PlayArea[_gamePlayer.Row, _gamePlayer.Column] = new ActivatedFountainCave();
+            // Change _fountain message
+            PlayArea[gamePlayer.Row, gamePlayer.Column] = new ActivatedFountainCave();
 
-            // Change cavern entrance message.
-            PlayArea[_entrancePosition.Row, _entrancePosition.Column] = new ActivatedCavernEntrance();
+            // Change cavern _entrance message.
+            PlayArea[baseObjectPositions["entrance"].Row, baseObjectPositions["entrance"].Column] = new ActivatedCavernEntrance();
         }
         // Nope!
-        else WriteLine("\nCan't be done - you  have to be present in the fountain cave to do that!");
+        else WriteLine("\nCan't be done - you  have to be present in the _fountain cave to do that!");
 
         return true;
     }
 
     private bool Attack()
     {
-        if (_gamePlayer.Bow && _gamePlayer.Arrows > 0)
+        if (gamePlayer.Bow && gamePlayer.Arrows > 0)
         {
             bool result = GetAttackDirection() switch
             {
-                "1" or "n" or "north" => ShootNorth(),
-                "2" or "e" or "east" => ShootEast(),
-                "3" or "s" or "south" => ShootSouth(),
-                "4" or "w" or "west" => ShootWest(),
+                "1" or "n" or "north" => ShootArrowNorth(),
+                "2" or "e" or "east" => ShootArrowEast(),
+                "3" or "s" or "south" => ShootArrowSouth(),
+                "4" or "w" or "west" => ShootArrowWest(),
                 _ => true
             };
             return result;
         }
-        else if (!_gamePlayer.Bow)
+        else if (!gamePlayer.Bow)
         {
             WriteLine("Attack with what?");
             return true;
@@ -742,44 +654,45 @@ public class PlayTheGame
 
     /// <summary>
     ///  Restrict shooting to within the board - no wrap round but no arrow reduction for an off board shot!
-    ///  TODO Revise when peril detection around board completed (ie shoot from (1,7) at  peril at (1.0). 
+    ///  TODO Revise when peril detection around board completed (ie shoot from (1,7) at  peril at (1.0).
     /// </summary>
     /// <returns> The success of the arrow being shot</returns>
-    private bool ShootNorth()
+    private bool ShootArrowNorth()
     {
-        if (_gamePlayer.Row > 0)
+        if (gamePlayer.Row > 0)
         {
-            DetermineArrowShotResult(_gamePlayer.Column, _gamePlayer.Row - 1);
-            _gamePlayer.Arrows -= 1;
+            DetermineArrowShotResult(gamePlayer.Column, gamePlayer.Row - 1);
+            gamePlayer.Arrows -= 1;
         }
         return true;
     }
 
-    private bool ShootEast()
+    private bool ShootArrowEast()
     {
-        if (_gamePlayer.Column < PlayArea.GetUpperBound(0))
+        if (gamePlayer.Column < PlayArea.GetUpperBound(0))
         {
-            DetermineArrowShotResult(_gamePlayer.Row, _gamePlayer.Column + 1);
-            _gamePlayer.Arrows -= 1;
+            DetermineArrowShotResult(gamePlayer.Row, gamePlayer.Column + 1);
+            gamePlayer.Arrows -= 1;
         }
         return true;
     }
 
-    private bool ShootSouth()
+    private bool ShootArrowSouth()
     {
-        if (_gamePlayer.Row < PlayArea.GetUpperBound(0))
+        if (gamePlayer.Row < PlayArea.GetUpperBound(0))
         {
-            DetermineArrowShotResult(_gamePlayer.Row + 1, _gamePlayer.Column);
-            _gamePlayer.Arrows -= 1;
+            DetermineArrowShotResult(gamePlayer.Row + 1, gamePlayer.Column);
+            gamePlayer.Arrows -= 1;
         }
         return true;
     }
-    private bool ShootWest()
+
+    private bool ShootArrowWest()
     {
-        if (_gamePlayer.Column > 0)
+        if (gamePlayer.Column > 0)
         {
-            DetermineArrowShotResult(_gamePlayer.Row, _gamePlayer.Column - 1);
-            _gamePlayer.Arrows -= 1;
+            DetermineArrowShotResult(gamePlayer.Row, gamePlayer.Column - 1);
+            gamePlayer.Arrows -= 1;
         }
         return true;
     }
@@ -793,40 +706,23 @@ public class PlayTheGame
 
     private void CheckForShotMaelstroms(int row, int column)
     {
-        int _rowMax = PlayArea.GetUpperBound(0);
+        int index = -1;
 
-        // Small board
-        if (_maestromPosition1.ArrowIsTheSameAs(row, column))
+        foreach (var item in maelstromPositions)
         {
-            PlayArea[row, column] = new AnEmptyCave();
-            _maestromPosition1.Row = -99;
-            _maestromPosition1.Column = -99;
+            if (item.ArrowIsTheSameAs(row, column))
+            {
+                AnAttackedMaelstrom();
+                index = maelstromPositions.IndexOf(item);
+
+                break;
+            }
         }
 
-        // Medium board
-        if (_rowMax > 3 && _maestromPosition2.ArrowIsTheSameAs(row, column))
+        if (index > -1)
         {
             PlayArea[row, column] = new AnEmptyCave();
-            _maestromPosition2.Row = -99;
-            _maestromPosition2.Column = -99;
-        }
-
-        // Large board
-        if (_rowMax > 5)
-        {
-            if (_maestromPosition3.ArrowIsTheSameAs(row, column))
-            {
-                PlayArea[row, column] = new AnEmptyCave();
-                _maestromPosition3.Row = -99;
-                _maestromPosition3.Column = -99;
-            }
-
-            if (_maestromPosition4.ArrowIsTheSameAs(row, column))
-            {
-                PlayArea[row, column] = new AnEmptyCave();
-                _maestromPosition4.Row = -99;
-                _maestromPosition4.Column = -99;
-            }
+            maelstromPositions[index] = new PerilPosition(99, 99);
         }
     }
 
@@ -837,137 +733,74 @@ public class PlayTheGame
     /// <param name="row"></param>
     private void CheckForShotAmaroks(int row, int column)
     {
-        int _rowMax = PlayArea.GetUpperBound(0);
+        int index = -1;
 
-        //Small Board
-        if (_amarockPosition1.ArrowIsTheSameAs(row, column))
+        foreach (var item in amarokPositions)
         {
-            PlayArea[row, column] = new AnEmptyCave();
-            _amarockPosition1.Row = -99;
-            _amarockPosition1.Column = -99;
+            if (item.ArrowIsTheSameAs(row, column))
+            {
+                AnAttackedAmarock();
+                index = amarokPositions.IndexOf(item);
+
+                break;
+            }
         }
 
-        // Medium Board
-        if (_rowMax > 3 && _amarockPosition2.ArrowIsTheSameAs(row, column))
+        if (index > -1)
         {
             PlayArea[row, column] = new AnEmptyCave();
-            _amarockPosition2.Row = -99;
-            _amarockPosition2.Column = -99;
-        }
-
-        // Large Board
-        if (_rowMax > 5 && _amarockPosition3.ArrowIsTheSameAs(row, column))
-        {
-            PlayArea[_gamePlayer.Row, _gamePlayer.Column] = new AnEmptyCave();
-            _amarockPosition3.Row = -99;
-            _amarockPosition3.Column = -99;
+            amarokPositions[index] = new PerilPosition(99, 99);
         }
     }
 
     private bool CheckForPits()
     {
-        // Assumes a rectangular board.
-        int _rowMax = PlayArea.GetUpperBound(0);
-
         // One default pit on all boards
+        // A Pit is near but don't print its message if the player is to be blown away to a new cave.
+        // Search through Maelstroms List to find whether the player is about to be blown away.
 
-        if (_pitPosition1.PlayerIsTheSameAs(_gamePlayer))
+        foreach (var item in maelstromPositions)
         {
-            // You fell in!
-            PlayArea[_gamePlayer.Row, _gamePlayer.Column].ToString();
-            return true;
-        }
-
-        // A Pit is near but don't print its message if the player is about to be blown away to a new cave.
-        if (!_maestromPosition1.PlayerIsTheSameAs(_gamePlayer))
-        {
-            _pitPosition1.IsAdjacentTo(_gamePlayer);
-        }
-
-        // An extra pit on the Medium board
-        if (_rowMax > 3)
-        {
-            // Pit 2
-            if (_pitPosition2.PlayerIsTheSameAs(_gamePlayer))
+            if (item.PlayerIsTheSameAs(gamePlayer))
             {
-                PlayArea[_gamePlayer.Row, _gamePlayer.Column].ToString();
+                return false;
+            }
+        }
+
+        foreach (var item in pitPositions)
+        {
+            if (item.PlayerIsTheSameAs(gamePlayer))
+            {
+                // You fell in!
+                PlayArea[gamePlayer.Row, gamePlayer.Column].ToString();
                 return true;
             }
-            if (!_maestromPosition2.PlayerIsTheSameAs(_gamePlayer))
+
+            if (item.PlayerIsAdjacentTo(gamePlayer))
             {
-                _pitPosition2.IsAdjacentTo(_gamePlayer);
+                AnAdjacentPit();
+                break;
             }
         }
 
-        // Two  extra pits on Large board.
-        if (_rowMax > 5)
-        {
-            // Pit 3
-            if (_pitPosition3.PlayerIsTheSameAs(_gamePlayer))
-            {
-                PlayArea[_gamePlayer.Row, _gamePlayer.Column].ToString();
-                return true;
-            }
-            if (!_maestromPosition3.PlayerIsTheSameAs(_gamePlayer))
-            {
-                _pitPosition3.IsAdjacentTo(_gamePlayer);
-            }
-
-            // Pit 4
-            if (_pitPosition4.PlayerIsTheSameAs(_gamePlayer))
-            {
-                PlayArea[_gamePlayer.Row, _gamePlayer.Column].ToString();
-                return true;
-            }
-            if (!_maestromPosition4.PlayerIsTheSameAs(_gamePlayer))
-            {
-                _pitPosition4.IsAdjacentTo(_gamePlayer);
-            }
-        }
         return false;
     }
 
     private bool CheckForAmaroks()
     {
-        int _rowMax = PlayArea.GetUpperBound(0);
-
-        if (_amarockPosition1.PlayerIsTheSameAs(_gamePlayer))
+        foreach (var item in amarokPositions)
         {
-            // You died!
-            PlayArea[_gamePlayer.Row, _gamePlayer.Column].ToString();
-            return true;
-        }
-
-        if (!_amarockPosition1.PlayerIsTheSameAs(_gamePlayer))
-        {
-            _amarockPosition1.IsAdjacentTo(_gamePlayer);
-        }
-
-        if (_rowMax > 3)
-        {
-            if (_amarockPosition2.PlayerIsTheSameAs(_gamePlayer))
+            if (item.PlayerIsTheSameAs(gamePlayer))
             {
-                PlayArea[_gamePlayer.Row, _gamePlayer.Column].ToString();
+                // You died!
+                PlayArea[gamePlayer.Row, gamePlayer.Column].ToString();
                 return true;
             }
 
-            if (!_amarockPosition2.PlayerIsTheSameAs(_gamePlayer))
+            if (item.PlayerIsAdjacentTo(gamePlayer))
             {
-                _amarockPosition2.IsAdjacentTo(_gamePlayer);
-            }
-        }
-
-        if (_rowMax > 5)
-        {
-            if (_amarockPosition3.PlayerIsTheSameAs(_gamePlayer))
-            {
-                PlayArea[_gamePlayer.Row, _gamePlayer.Column].ToString();
-                return true;
-            }
-
-            if (!_amarockPosition3.PlayerIsTheSameAs(_gamePlayer))
-            {
-                _amarockPosition3.IsAdjacentTo(_gamePlayer);
+                AnAdjacentAmarok();
+                return false;
             }
         }
         return false;
@@ -976,94 +809,57 @@ public class PlayTheGame
     private void CheckForMaelstroms()
     {
         // Assumes rectangular board.
-        int _rowMax = PlayArea.GetUpperBound(0);
+
+        (int row, int column) _newPosition = (0, 0);
+        int index = -1;
 
         // Small board maelstrom1 is present.
-
-        _maestromPosition1.IsAdjacentTo(_gamePlayer);
-
-        if (_maestromPosition1.PlayerIsTheSameAs(_gamePlayer))
+        foreach (var item in maelstromPositions)
         {
-            PlayArea[_gamePlayer.Row, _gamePlayer.Column].ToString();
-            BlowPlayerToAnotherCave();
-
-            (int row, int column) = MoveMaelstrom(_maestromPosition1.Row, _maestromPosition1.Column);
-
-            _maestromPosition1.Row = row;
-            _maestromPosition1.Column = column;
-        }
-
-        // Medium board one Maelstrom
-        if (_rowMax > 3)
-        {
-            _maestromPosition2.IsAdjacentTo(_gamePlayer);
-
-
-            if (_maestromPosition2.PlayerIsTheSameAs(_gamePlayer))
+            if (item.PlayerIsAdjacentTo(gamePlayer))
             {
-                PlayArea[_gamePlayer.Row, _gamePlayer.Column].ToString();
+                AnAdjacentMaelstrom();
+                break;
+            }
+
+            if (item.PlayerIsTheSameAs(gamePlayer))
+            {
+                PlayArea[gamePlayer.Row, gamePlayer.Column].ToString();
                 BlowPlayerToAnotherCave();
 
-                (int row, int column) = MoveMaelstrom(_maestromPosition2.Row, _maestromPosition2.Column);
-
-                _maestromPosition2.Row = row;
-                _maestromPosition2.Column = column;
+                _newPosition = MoveMaelstrom(item.Row, item.Column);
+                index = maelstromPositions.IndexOf(item);
+                break;
             }
         }
 
-        // Large board with 2 extra Maelstroms
-        if (_rowMax > 5)
-        {
-            _maestromPosition3.IsAdjacentTo(_gamePlayer);
-
-            if (_maestromPosition3.PlayerIsTheSameAs(_gamePlayer))
-            {
-                PlayArea[_gamePlayer.Row, _gamePlayer.Column].ToString();
-                BlowPlayerToAnotherCave();
-
-                (int row, int column) = MoveMaelstrom(_maestromPosition3.Row, _maestromPosition3.Column);
-
-                _maestromPosition3.Row = row;
-                _maestromPosition3.Column = column;
-            }
-
-            _maestromPosition4.IsAdjacentTo(_gamePlayer);
-
-            if (_maestromPosition4.PlayerIsTheSameAs(_gamePlayer))
-            {
-                PlayArea[_gamePlayer.Row, _gamePlayer.Column].ToString();
-                BlowPlayerToAnotherCave();
-
-                (int row, int column) = MoveMaelstrom(_maestromPosition4.Row, _maestromPosition4.Column);
-
-                _maestromPosition4.Row = row;
-                _maestromPosition4.Column = column;
-            }
-        }
+        if (index > -1)
+            maelstromPositions[index] = new PerilPosition(_newPosition.row, _newPosition.column);
     }
 
     /// <summary>
-    /// //Move a Maelstrom to a new position after resetting 'old'  cave.
+    /// Move a Maelstrom to a new position after resetting 'old'  cave.
     /// </summary>
     /// <param names="row, column">Existing Maelstrom position</param>
     /// <returns></returns>
-    private (int, int) MoveMaelstrom(int row, int column)
+    private (int row, int column) MoveMaelstrom(int row, int column)
     {
         PlayArea[row, column] = new AnEmptyCave();
 
         do
         {
             // South
-            if (row + 1 > PlayArea.GetUpperBound(1)) row = PlayArea.GetLowerBound(1);
+            if (row++ > PlayArea.GetUpperBound(1)) row = PlayArea.GetLowerBound(1);
             else row++;
             // West * 2
-            if (column - 1 < PlayArea.GetLowerBound(0)) column = PlayArea.GetUpperBound(0);
+            if (column-- < PlayArea.GetLowerBound(0)) column = PlayArea.GetUpperBound(0);
             else column--;
-            if (column - 1 < PlayArea.GetLowerBound(0)) column = PlayArea.GetUpperBound(0);
+            if (column-- < PlayArea.GetLowerBound(0)) column = PlayArea.GetUpperBound(0);
             else column--;
         }
-        // Redo if the new cave position overwrites the fountain or entrance caves
-        while (_fountainPosition.IsTheSameAs(row, column) || _entrancePosition.PlayerIsTheSameAs(row, column));
+
+        // Redo if the new cave position overwrites the _fountain or _entrance caves
+        while (baseObjectPositions["entrance"].IsTheSameAs(row, column) || baseObjectPositions["fountain"].IsTheSameAs(row, column));
 
         PlayArea[row, column] = new AMaelstrom();
 
@@ -1072,9 +868,9 @@ public class PlayTheGame
 
     private void BlowPlayerToAnotherCave()
     {
-        MoveNorth();
-        MoveEast();
-        MoveEast();
+        MovePlayerNorth();
+        MovePlayerEast();
+        MovePlayerEast();
     }
 
     private static bool PrintHelp()
@@ -1086,16 +882,50 @@ public class PlayTheGame
             'Move South' or 'South' or 'S'  => Move to the South
             'Move West' or 'West' or 'W'  => Move to the West
 
-            'Attack' or 'Shoot' or 'Loose' will enable you to shoot at monsters.
-            "Enable Fountain" or "Enable" or "Activate" to restart the Fountain.
+            'Attack' or 'Shoot' or 'Loose' will enable you to fire arrows at monsters, if you have them.
+            "Enable Fountain" or "Enable" or "Activate" will restart the Fountain but only if you are in its presence.
 
             """;
         WriteLine(_helpMenu);
 
         return true;
     }
-}
 
+    private static void AnAdjacentPit()
+    {
+        ForegroundColor = ConsoleColor.Red;
+        WriteLine("You feel a draught, There is a pit nearby!");
+        ResetColor();
+    }
+
+    private static void AnAdjacentAmarok()
+    {
+        ForegroundColor = ConsoleColor.Yellow;
+        WriteLine("You smell the rotten stench of an Amarok in a nearby cave!");
+        ResetColor();
+    }
+
+    private static void AnAttackedAmarock()
+    {
+        ForegroundColor = ConsoleColor.Yellow;
+        WriteLine("\nYou hear the whines and yelps of the fatally stricken Amarok. It will trouble you no more!");
+        ResetColor();
+    }
+
+    private static void AnAdjacentMaelstrom()
+    {
+        ForegroundColor = ConsoleColor.Green;
+        WriteLine("You hear the growling and groaning of a Maelstrom nearby!");
+        ResetColor();
+    }
+
+    private static void AnAttackedMaelstrom()
+    {
+        ForegroundColor = ConsoleColor.Green;
+        WriteLine("\nThe roaring of the Maelstrom fades away, transformed into a fragrant zephyr.");
+        ResetColor();
+    }
+}
 
 public interface ICave
 {
@@ -1104,14 +934,15 @@ public interface ICave
     string ToString();
 }
 
-
 public class CavernEntrance : ICave
 {
     public string Description { get; private set; }
+
     public CavernEntrance()
     {
-        Description = "You see a light coming from outside the cavern. This is the entrance.";
+        Description = "You see a light coming from outside the cavern. This is the _entrance.";
     }
+
     public override string ToString()
     {
         ForegroundColor = ConsoleColor.Yellow;
@@ -1129,6 +960,7 @@ public class ActivatedCavernEntrance : ICave
     {
         Description = "The Fountain of Objects has been re-activated. You have escaped with your life!";
     }
+
     public override string ToString()
     {
         ForegroundColor = ConsoleColor.Yellow;
@@ -1141,6 +973,7 @@ public class ActivatedCavernEntrance : ICave
 public class FountainCave : ICave
 {
     public string Description { get; private set; }
+
     public FountainCave()
     {
         Description = "You hear water dripping, The Fountain of Objects is here!";
@@ -1158,6 +991,7 @@ public class FountainCave : ICave
 public class ActivatedFountainCave : ICave
 {
     public string Description { get; private set; }
+
     public ActivatedFountainCave()
     {
         Description = "You hear rushing waters from the Fountain of Objects. It has been reactivated!";
@@ -1172,10 +1006,11 @@ public class ActivatedFountainCave : ICave
     }
 }
 
-public class ABottomlessPit : ICave
+public class BottomlessPit : ICave
 {
     public string Description { get; private set; }
-    public ABottomlessPit()
+
+    public BottomlessPit()
     {
         Description = "You have blundered into a bottomless pit. So sad!  See you in the next life. Bye .... ";
     }
@@ -1213,7 +1048,7 @@ public class AnAmarock : ICave
 
     public AnAmarock()
     {
-        Description = "You have stumbled into an Amarok's lair and died instantly. Too bad really ... Bye!";
+        Description = "You have stumbled into an Amarok's lair and have instantly died. Too bad really ... Bye!";
     }
 
     public override string ToString()
@@ -1228,10 +1063,12 @@ public class AnAmarock : ICave
 public class AnEmptyCave : ICave
 {
     public string Description { get; private set; }
+
     public AnEmptyCave()
     {
-        Description = "A creepy, dark, pitted  and deserted cave. Move along now - nothing to see here!";
+        Description = "A creepy, dark, pitted  and deserted cave. Move along - nothing to see here!";
     }
+
     public override string ToString()
     {
         WriteLine(Description);
