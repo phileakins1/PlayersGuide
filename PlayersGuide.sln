@@ -49,7 +49,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheFeud", "TheFeud\TheFeud.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheLockedDoor", "TheLockedDoor\TheLockedDoor.csproj", "{75CD36DD-0A97-4F1D-8087-3A51C208FFB4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FountainOfObjects", "FountainOfObjects\FountainOfObjects.csproj", "{096E5608-FA9D-4DDF-BF2B-9D6521ACB5C2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FountainOfObjects", "FountainOfObjects\FountainOfObjects.csproj", "{096E5608-FA9D-4DDF-BF2B-9D6521ACB5C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
