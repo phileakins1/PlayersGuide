@@ -302,9 +302,9 @@ public class BoardObjectPositions(ICave[,] caves)
 
             Once upon a time, in a galaxy far, far away ...
 
-            You, a fearless adventurer, enters the Cavern of Objects, a maze of caves filled with dangerous pits to activate the Fountain of Objects.
+            You, a fearless adventurer, enter the Cavern of Objects, a maze of caves filled with dangerous pits to seek and activate the Fountain of Objects.
 
-            Light is visible only in the entrance, little other light is seen anywhere in the cavern.  You must navigate the caverns with your senses. Find the Fountain of Objects, activate it, and return to the entrance.
+            Light is visible only in the entrance, little other light is to be found in the cavern.  You must navigate the caves with your senses. Find the Fountain of Objects, activate it, and return to the entrance.
 
             Look out for Pits, you will feel a breeze if a pit is nearby. If you enter a cave with a pit, you will fall eternally.
 
@@ -339,7 +339,7 @@ public class PlayTheGame
 
     private readonly List<PerilPosition> _pitPositions = [];
     private readonly List<PerilPosition> _amarokPositions = [];
-    private readonly List<PerilPosition> maelstromPositions = [];
+    private readonly List<PerilPosition> _maelstromPositions = [];
 
 
     /// <summary>
@@ -466,7 +466,7 @@ public class PlayTheGame
     private void AddMaelstroms((int row, int column) position)
     {
         PlayArea[position.row, position.column] = new Maelstrom();
-        maelstromPositions.Add(new PerilPosition() { Row = position.row, Column = position.column });
+        _maelstromPositions.Add(new PerilPosition() { Row = position.row, Column = position.column });
     }
 
     private void PositionAmaroksOnBoard()
@@ -670,7 +670,7 @@ public class PlayTheGame
         if (gamePlayer.Row > 0)
         {
             DetermineArrowShotResult(gamePlayer.Column, gamePlayer.Row - 1);
-            gamePlayer.Arrows -= 1;
+            gamePlayer.Arrows--;
         }
         return true;
     }
@@ -680,7 +680,7 @@ public class PlayTheGame
         if (gamePlayer.Column < PlayArea.GetUpperBound(0))
         {
             DetermineArrowShotResult(gamePlayer.Row, gamePlayer.Column + 1);
-            gamePlayer.Arrows -= 1;
+            gamePlayer.Arrows--;
         }
         return true;
     }
@@ -690,7 +690,7 @@ public class PlayTheGame
         if (gamePlayer.Row < PlayArea.GetUpperBound(0))
         {
             DetermineArrowShotResult(gamePlayer.Row + 1, gamePlayer.Column);
-            gamePlayer.Arrows -= 1;
+            gamePlayer.Arrows--;
         }
         return true;
     }
@@ -700,7 +700,7 @@ public class PlayTheGame
         if (gamePlayer.Column > 0)
         {
             DetermineArrowShotResult(gamePlayer.Row, gamePlayer.Column - 1);
-            gamePlayer.Arrows -= 1;
+            gamePlayer.Arrows--;
         }
         return true;
     }
@@ -710,18 +710,19 @@ public class PlayTheGame
         // If successful remove all traces of the peril from the board and its List
         CheckForShotMaelstroms(row, column);
         CheckForShotAmaroks(row, column);
+        CheckForShotsAtPits(row, column);
     }
 
     private void CheckForShotMaelstroms(int row, int column)
     {
         int index = -1;
 
-        foreach (var item in maelstromPositions)
+        foreach (var item in _maelstromPositions)
         {
             if (item.ArrowIsTheSameAs(row, column))
             {
                 AnAttackedMaelstrom();
-                index = maelstromPositions.IndexOf(item);
+                index = _maelstromPositions.IndexOf(item);
 
                 break;
             }
@@ -731,7 +732,7 @@ public class PlayTheGame
         {
             // Success!
             PlayArea[row, column] = new EmptyCave();
-            maelstromPositions.RemoveAt(index);
+            _maelstromPositions.RemoveAt(index);
         }
     }
 
@@ -757,9 +758,22 @@ public class PlayTheGame
 
         if (index > -1)
         {
-            // Good shot!
+            // Good shot sir!
             PlayArea[row, column] = new EmptyCave();
             _amarokPositions.RemoveAt(index);
+        }
+    }
+
+    /// <summary>
+    ///  Leave a message about the wasted arrow
+    /// </summary>
+    /// <param name="row"></param>
+    /// <param name="column"></param>
+    private void CheckForShotsAtPits(int row, int column)
+    {
+        foreach (var item in _pitPositions)
+        {
+            if (item.ArrowIsTheSameAs(row, column)) Console.WriteLine("\nYou hear your arrow clatter uselessly into the pit. What a waste!");
         }
     }
 
@@ -768,7 +782,7 @@ public class PlayTheGame
         // One default pit on all boards
 
         // Search through Maelstroms List to find whether the player is about to be blown away, no need for a peril adjacent message.
-        foreach (var item in maelstromPositions)
+        foreach (var item in _maelstromPositions)
         {
             if (item.PlayerIsTheSameAs(gamePlayer))
             {
@@ -820,7 +834,7 @@ public class PlayTheGame
         (int row, int column) _newPosition = (0, 0);
         int index = -1;
 
-        foreach (var item in maelstromPositions)
+        foreach (var item in _maelstromPositions)
         {
             if (item.PlayerIsAdjacentTo(gamePlayer))
             {
@@ -833,13 +847,13 @@ public class PlayTheGame
                 BlowPlayerToAnotherCave();
 
                 _newPosition = MoveMaelstrom(item.Row, item.Column);
-                index = maelstromPositions.IndexOf(item);
+                index = _maelstromPositions.IndexOf(item);
                 break;
             }
         }
 
         if (index > -1)
-            maelstromPositions[index] = new PerilPosition(_newPosition.row, _newPosition.column);
+            _maelstromPositions[index] = new PerilPosition(_newPosition.row, _newPosition.column);
     }
 
     /// <summary>
@@ -1022,7 +1036,7 @@ public class BottomlessPit : ICave
 
     public BottomlessPit()
     {
-        Description = "You have blundered into a bottomless pit. So sad!  See you in the next life. Bye .... ";
+        Description = "You have blundered into a bottomless pit. So sad!  See you in the next life. Bye ........ ";
     }
 
     public override string ToString()
