@@ -409,23 +409,20 @@ public class PlayTheGame
         int colMax = PlayArea.GetUpperBound(1);
 
         // First Pit on Small board
-        var pit = PitCavePosition1(rowMax, colMax);
-        AddPits(pit);
+
+        AddPits(PitCavePosition1(rowMax, colMax));
 
         // Extra pit on Medium board
         if (rowMax > 3)
         {
-            pit = PitCavePosition2(rowMax, colMax);
-            AddPits(pit);
+            AddPits(PitCavePosition2(rowMax, colMax));
 
             // 2 extra pits on Large board
             if (rowMax > 5)
             {
-                pit = PitCavePosition3(rowMax, colMax);
-                AddPits(pit);
+                AddPits(PitCavePosition3(rowMax, colMax));
 
-                pit = PitCavePosition4(rowMax, colMax);
-                AddPits(pit);
+                AddPits(PitCavePosition4(rowMax, colMax));
             }
         }
     }
@@ -442,23 +439,20 @@ public class PlayTheGame
         int colMax = PlayArea.GetUpperBound(1);
 
         // Initial Maelstrom on Small board
-        var maelstrom = MaelstromCavePosition1(rowMax, colMax);
-        AddMaelstroms(maelstrom);
+
+        AddMaelstroms(MaelstromCavePosition1(rowMax, colMax));
 
         // Medium board  plus one extra Maelstrom
         if (rowMax > 3)
         {
-            maelstrom = MaelstromCavePosition2(rowMax, colMax);
-            AddMaelstroms(maelstrom);
+            AddMaelstroms(MaelstromCavePosition2(rowMax, colMax));
 
             // Large board plus two extra
             if (rowMax > 5)
             {
-                maelstrom = MaelstromCavePosition3(rowMax, colMax);
-                AddMaelstroms(maelstrom);
+                AddMaelstroms(MaelstromCavePosition3(rowMax, colMax));
 
-                maelstrom = MaelstromCavePosition4(rowMax, colMax);
-                AddMaelstroms(maelstrom);
+                AddMaelstroms(MaelstromCavePosition4(rowMax, colMax));
             }
         }
     }
@@ -475,21 +469,19 @@ public class PlayTheGame
         int colMax = PlayArea.GetUpperBound(1);
 
         // initial Amarok on Small board
-        var amarok = AmarokCavePosition1(rowMax, colMax);
-        AddAmaroks(amarok);
+
+        AddAmaroks(AmarokCavePosition1(rowMax, colMax));
 
 
         // Medium board  plus one  Amarok
         if (rowMax > 3)
         {
-            amarok = AmarokCavePosition2(rowMax, colMax);
-            AddAmaroks(amarok);
+            AddAmaroks(AmarokCavePosition2(rowMax, colMax));
 
             // Large board plus one more Amarok
             if (rowMax > 5)
             {
-                amarok = AmarokCavePosition3(rowMax, colMax);
-                AddAmaroks(amarok);
+                AddAmaroks(AmarokCavePosition3(rowMax, colMax));
             }
         }
     }
@@ -550,7 +542,7 @@ public class PlayTheGame
         ForegroundColor = ConsoleColor.Red;
         Console.Write("\nGame over.");
         ResetColor();
-        Console.WriteLine("         Press any key to end.");
+        Console.WriteLine("   Press any key to end.");
         ReadKey();
     }
 
