@@ -546,6 +546,12 @@ public class PlayTheGame
                 _ => true
             };
         } while (_validResponse);
+
+        ForegroundColor = ConsoleColor.Red;
+        Console.Write("\nGame over.");
+        ResetColor();
+        Console.WriteLine("         Press any key to end.");
+        ReadKey();
     }
 
     private static string GetMovementInstruction()
@@ -1095,7 +1101,9 @@ public class EmptyCave : ICave
 
     public override string ToString()
     {
+        ForegroundColor = ConsoleColor.Gray;
         WriteLine(Description);
+        ResetColor();
 
         return string.Empty;
     }
