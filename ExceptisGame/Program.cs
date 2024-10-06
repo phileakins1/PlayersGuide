@@ -4,7 +4,7 @@ using CustomException;
 Random rand = new();
 
 int cookieNumber = rand.Next(0, 10);
-List<int> guesses = new();
+List<int> guesses = [];
 
 string player1 = "Player 1";
 string player2 = "Player 2";
