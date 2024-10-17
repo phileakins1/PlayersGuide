@@ -35,7 +35,7 @@ public static class Start
             """;
 
         Console.WriteLine(menu);
-        Console.Write(" Enter your selection here: >  ");
+        Console.Write(" Enter your selection here:  >  ");
     }
 
     public static void GetTestMethod(int method)
@@ -59,7 +59,6 @@ public static class Start
         {
             Sieve sieve = new(new IsItAGoodNumber(SieveMethod));
         }
-
         string? entry;
 
         do
