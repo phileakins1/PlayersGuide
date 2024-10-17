@@ -69,7 +69,6 @@ public class CreatePotion
         string? choice = Console.ReadLine();
 
         return choice;
-
     }
 
     private static Ingredient GetIngredientChoice(int userChose)
@@ -105,7 +104,6 @@ public class CreatePotion
     {
         string response = potion switch
         {
-
             Potion.water => "just plain water.",
             Potion.elixir => "an elixir potion.",
             Potion.poison => "a poison potion.",
